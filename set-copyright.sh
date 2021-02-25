@@ -35,7 +35,7 @@ do
         COMMENT_START="// "
     fi
 
-    if [[ $FILE  == *".ts" || $FILE  == *".tsx" ]]; then
+    if [[ $FILE  == *".ts" || $FILE  == *".tsx" || $FILE  == *".js" ]]; then
         COMMENT_START="/* "
         COMMENT_END=" */"
     fi
