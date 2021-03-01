@@ -8,11 +8,27 @@
 
 TMP_FILE="tmp_file"
 
-ALL_FILES=$(find . -name "*")
+EXCLUDE_DIR_PREFIX=(
+    "\."               # Hidden directories
+    "node_modules"     # Node modules
+    "build-harness"    # Build harness
+    "vbh"              # Vendorized build harness
+    )
 
-DRY_RUN=true
+FILTER_PATTERN=$(for i in "${!EXCLUDE_DIR_PREFIX[@]}"; do
+    printf "^\./${EXCLUDE_DIR_PREFIX[i]}"
+    if (( i < ${#EXCLUDE_DIR_PREFIX[@]} - 1 )); then
+        printf "\|";
+    fi
+done)
 
-COMMUNITY_COPY_HEADER_FILE="$PWD/copyright-header.txt"
+ALL_FILES=$(find . -name "*" | grep -v "${FILTER_PATTERN}")
+
+DRY_RUN=${DRY_RUN:-true}
+
+SCRIPT_DIR=$(dirname "${BASH_SOURCE[0]}")
+
+COMMUNITY_COPY_HEADER_FILE="$SCRIPT_DIR/copyright-header.txt"
 
 if [ ! -f $COMMUNITY_COPY_HEADER_FILE ]; then
   echo "File $COMMUNITY_COPY_HEADER_FILE not found!"
