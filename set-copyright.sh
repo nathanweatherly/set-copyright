@@ -94,7 +94,7 @@ do
 
         COMMUNITY_HEADER_AS_COMMENT="$COMMENT_START$COMMUNITY_COPY_HEADER_STRING$COMMENT_END"
 
-        if grep -q "$COMMUNITY_HEADER_AS_COMMENT" "$FILE"; then
+        if grep -qF "$COMMUNITY_HEADER_AS_COMMENT" "$FILE"; then
             echo "\t- Header already exists; skipping"
         else
 
@@ -107,15 +107,15 @@ do
 
             RH_COPY_HEADER_AS_COMMENT="$COMMENT_START$RH_COPY_HEADER$COMMENT_END"
 
-            if grep -q "$RH_COPY_HEADER_AS_COMMENT" "$FILE"; then
+            if grep -qF "$RH_COPY_HEADER_AS_COMMENT" "$FILE"; then
                 ALL_COPYRIGHTS="$ALLCOPYRIGHTS$RH_COPY_HEADER_AS_COMMENT$NEWLINE"
-                grep -v "$RH_COPY_HEADER_AS_COMMENT" $FILE > $TMP_FILE
+                grep -vF "$RH_COPY_HEADER_AS_COMMENT" $FILE > $TMP_FILE
                 mv $TMP_FILE  $FILE
                 echo -e "\t- Has Red Hat copyright header"
             fi
 
             ALL_COPYRIGHTS="$ALL_COPYRIGHTS$COMMUNITY_HEADER_AS_COMMENT$NEWLINE"
-            echo -e $ALL_COPYRIGHTS > $TMP_FILE
+            echo -e "$ALL_COPYRIGHTS" > $TMP_FILE
             cat $FILE >> $TMP_FILE
             mv $TMP_FILE $FILE
 
