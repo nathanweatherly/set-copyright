@@ -1,19 +1,31 @@
+#!/bin/bash
 # Copyright Contributors to the Open Cluster Management project
 
-#!/bin/bash
-
 # TESTED ON MAC!
+
+# NOTE: When running against a node repo, delete the node_modules directories first!  Then npm ci once all the
+#       copyright changes are incorporated.
 
 TMP_FILE="tmp_file"
 
 ALL_FILES=$(find . -name "*")
 
-COMMUNITY_COPY_HEADER_FILE="$PWD/cicd-scripts/copyright-header.txt"
+DRY_RUN=true
+
+COMMUNITY_COPY_HEADER_FILE="$PWD/copyright-header.txt"
+
+if [ ! -f $COMMUNITY_COPY_HEADER_FILE ]; then
+  echo "File $COMMUNITY_COPY_HEADER_FILE not found!"
+  exit 1
+fi
 
 RH_COPY_HEADER="Copyright (c) 2020 Red Hat, Inc."
 
 COMMUNITY_COPY_HEADER_STRING=$(cat $COMMUNITY_COPY_HEADER_FILE)
 
+echo "Desired copyright header is: $COMMUNITY_COPY_HEADER_STRING"
+
+# NOTE: Only use one newline or javascript and typescript linter/prettier will complain about the extra blank lines
 NEWLINE="\n"
 
 if [[ "$DRY_RUN" == true ]]; then
@@ -25,7 +37,7 @@ do
     echo "FILE: $FILE:"
     if [[ -d $FILE ]] ; then
         echo -e "\t-Directory; skipping"
-        continue 
+        continue
     fi
 
     COMMENT_START="# "
@@ -54,8 +66,13 @@ do
             || $FILE == *".yaml" \
             || $FILE == *".yml"  \
             || $FILE == *".sh"   \
+            || $FILE == *".js"   \
+            || $FILE == *".ts"   \
+            || $FILE == *".tsx"   \
             || $FILE == *"Dockerfile" \
             || $FILE == *"Makefile"  \
+            || $FILE == *"Dockerfile.prow" \
+            || $FILE == *"Makefile.prow"  \
             || $FILE == *".gitignore"  \
             || $FILE == *".md"  ]]; then
 
@@ -68,7 +85,7 @@ do
             if [[ "$DRY_RUN" == true ]]; then
                 echo -e "\t- [DRY RUN] Will add Community copyright header to file"
                 continue
-            fi    
+            fi
 
             ALL_COPYRIGHTS=""
 
@@ -80,11 +97,16 @@ do
                 mv $TMP_FILE  $FILE
                 echo -e "\t- Has Red Hat copyright header"
             fi
-            
+
             ALL_COPYRIGHTS="$ALL_COPYRIGHTS$COMMUNITY_HEADER_AS_COMMENT$NEWLINE"
             echo -e $ALL_COPYRIGHTS > $TMP_FILE
             cat $FILE >> $TMP_FILE
             mv $TMP_FILE $FILE
+
+            # Make sure shell script files are still executable
+            if  [[ $FILE == *".sh" ]]; then
+              chmod 755 $FILE
+            fi
 
             echo -e "\t- Adding Community copyright header to file"
         fi
