@@ -95,7 +95,7 @@ do
         COMMUNITY_HEADER_AS_COMMENT="$COMMENT_START$COMMUNITY_COPY_HEADER_STRING$COMMENT_END"
 
         if grep -qF "$COMMUNITY_HEADER_AS_COMMENT" "$FILE"; then
-            echo "\t- Header already exists; skipping"
+            echo -e "\t- Header already exists; skipping"
         else
 
             if [[ "$DRY_RUN" == true ]]; then
