@@ -8,11 +8,27 @@
 
 TMP_FILE="tmp_file"
 
-ALL_FILES=$(find . -name "*")
+EXCLUDE_DIR_PREFIX=(
+    "\."               # Hidden directories
+    "node_modules"     # Node modules
+    "build-harness"    # Build harness
+    "vbh"              # Vendorized build harness
+    )
 
-DRY_RUN=true
+FILTER_PATTERN=$(for i in "${!EXCLUDE_DIR_PREFIX[@]}"; do
+    printf "^\./${EXCLUDE_DIR_PREFIX[i]}"
+    if (( i < ${#EXCLUDE_DIR_PREFIX[@]} - 1 )); then
+        printf "\|";
+    fi
+done)
 
-COMMUNITY_COPY_HEADER_FILE="$PWD/copyright-header.txt"
+ALL_FILES=$(find . -name "*" | grep -v "${FILTER_PATTERN}")
+
+DRY_RUN=${DRY_RUN:-true}
+
+SCRIPT_DIR=$(dirname "${BASH_SOURCE[0]}")
+
+COMMUNITY_COPY_HEADER_FILE="$SCRIPT_DIR/copyright-header.txt"
 
 if [ ! -f $COMMUNITY_COPY_HEADER_FILE ]; then
   echo "File $COMMUNITY_COPY_HEADER_FILE not found!"
@@ -78,8 +94,8 @@ do
 
         COMMUNITY_HEADER_AS_COMMENT="$COMMENT_START$COMMUNITY_COPY_HEADER_STRING$COMMENT_END"
 
-        if grep -q "$COMMUNITY_HEADER_AS_COMMENT" "$FILE"; then
-            echo "\t- Header already exists; skipping"
+        if grep -qF "$COMMUNITY_HEADER_AS_COMMENT" "$FILE"; then
+            echo -e "\t- Header already exists; skipping"
         else
 
             if [[ "$DRY_RUN" == true ]]; then
@@ -91,15 +107,15 @@ do
 
             RH_COPY_HEADER_AS_COMMENT="$COMMENT_START$RH_COPY_HEADER$COMMENT_END"
 
-            if grep -q "$RH_COPY_HEADER_AS_COMMENT" "$FILE"; then
+            if grep -qF "$RH_COPY_HEADER_AS_COMMENT" "$FILE"; then
                 ALL_COPYRIGHTS="$ALLCOPYRIGHTS$RH_COPY_HEADER_AS_COMMENT$NEWLINE"
-                grep -v "$RH_COPY_HEADER_AS_COMMENT" $FILE > $TMP_FILE
+                grep -vF "$RH_COPY_HEADER_AS_COMMENT" $FILE > $TMP_FILE
                 mv $TMP_FILE  $FILE
                 echo -e "\t- Has Red Hat copyright header"
             fi
 
             ALL_COPYRIGHTS="$ALL_COPYRIGHTS$COMMUNITY_HEADER_AS_COMMENT$NEWLINE"
-            echo -e $ALL_COPYRIGHTS > $TMP_FILE
+            echo -e "$ALL_COPYRIGHTS" > $TMP_FILE
             cat $FILE >> $TMP_FILE
             mv $TMP_FILE $FILE
 
