@@ -35,7 +35,10 @@ if [ ! -f $COMMUNITY_COPY_HEADER_FILE ]; then
   exit 1
 fi
 
-RH_COPY_HEADER="Copyright (c) 2020 Red Hat, Inc."
+RH_COPY_HEADER=()
+for year in {2020..2021}; do
+    RH_COPY_HEADER+=( "Copyright (c) ${year} Red Hat, Inc." )
+done
 
 COMMUNITY_COPY_HEADER_STRING=$(cat $COMMUNITY_COPY_HEADER_FILE)
 
@@ -105,17 +108,18 @@ do
 
             ALL_COPYRIGHTS=""
 
-            RH_COPY_HEADER_AS_COMMENT="$COMMENT_START$RH_COPY_HEADER$COMMENT_END"
-
-            if grep -qF "$RH_COPY_HEADER_AS_COMMENT" "$FILE"; then
-                ALL_COPYRIGHTS="$ALLCOPYRIGHTS$RH_COPY_HEADER_AS_COMMENT$NEWLINE"
-                grep -vF "$RH_COPY_HEADER_AS_COMMENT" $FILE > $TMP_FILE
-                mv $TMP_FILE  $FILE
-                echo -e "\t- Has Red Hat copyright header"
-            fi
+            for rh_header in "${RH_COPY_HEADER[@]}"; do
+                RH_COPY_HEADER_AS_COMMENT="$COMMENT_START$rh_header$COMMENT_END"
+                if grep -qF "$RH_COPY_HEADER_AS_COMMENT" "$FILE"; then
+                    ALL_COPYRIGHTS="$ALLCOPYRIGHTS$RH_COPY_HEADER_AS_COMMENT$NEWLINE"
+                    grep -vF "$RH_COPY_HEADER_AS_COMMENT" $FILE > $TMP_FILE
+                    mv $TMP_FILE  $FILE
+                    echo -e "\t- Has Red Hat copyright header"
+                fi
+            done
 
             # Capture any other header information
-            if (head -1 ${FILE} | grep "${COMMENT_START}" &>/dev/null); then
+            if (head -1 ${FILE} | grep "^$(echo "${COMMENT_START}" | sed 's/ $//' | sed 's/\*/\\*/')" &>/dev/null); then
                 if [[ -z "${COMMENT_END}" ]]; then
                     # Capture up to the first blank line and then capture any comments within
                     EXISTING_HEADER=$(sed '/^$/q' $FILE | sed "/^[^${COMMENT_START}]/q" | sed '$d')
@@ -123,8 +127,14 @@ do
                     grep -vF "$EXISTING_HEADER" $FILE > $TMP_FILE
                     mv $TMP_FILE  $FILE
                     echo -e "\t- Has general header"
-                # else
-                    # EXISTING_HEADER=$()
+                else
+                    # Capture first full comment
+                    EXISTING_HEADER=$(sed -n "/^$(echo "\\${COMMENT_START}" | sed 's/ $//' | sed 's/\*/\\*/')/,/.*$(echo "\\${COMMENT_END}" | sed 's/^ //' | sed 's/\//\\\//')$/p" $FILE)
+                    ALL_COPYRIGHTS="${EXISTING_HEADER}${NEWLINE}${ALL_COPYRIGHTS}"
+                    grep -vF "$EXISTING_HEADER" $FILE > $TMP_FILE
+                    mv $TMP_FILE  $FILE
+                    echo -e "\t- Has general header"
+                    EXISTING_HEADER=$()
                 fi
             fi
 
@@ -143,6 +153,8 @@ do
     else
         echo -e "\t- DO NOTHING"
     fi
+
+    COMMENT_END=""
 done
 
 rm -f $TMP_FILE
