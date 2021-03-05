@@ -114,6 +114,20 @@ do
                 echo -e "\t- Has Red Hat copyright header"
             fi
 
+            # Capture any other header information
+            if (head -1 ${FILE} | grep "${COMMENT_START}" &>/dev/null); then
+                if [[ -z "${COMMENT_END}" ]]; then
+                    # Capture up to the first blank line and then capture any comments within
+                    EXISTING_HEADER=$(sed '/^$/q' $FILE | sed "/^[^${COMMENT_START}]/q" | sed '$d')
+                    ALL_COPYRIGHTS="${EXISTING_HEADER}${NEWLINE}${ALL_COPYRIGHTS}"
+                    grep -vF "$EXISTING_HEADER" $FILE > $TMP_FILE
+                    mv $TMP_FILE  $FILE
+                    echo -e "\t- Has general header"
+                # else
+                    # EXISTING_HEADER=$()
+                fi
+            fi
+
             ALL_COPYRIGHTS="$ALL_COPYRIGHTS$COMMUNITY_HEADER_AS_COMMENT$NEWLINE"
             echo -e "$ALL_COPYRIGHTS" > $TMP_FILE
             cat $FILE >> $TMP_FILE
