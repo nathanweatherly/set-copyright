@@ -3,8 +3,8 @@
 
 # TESTED ON MAC!
 
-# NOTE: When running against a node repo, delete the node_modules directories first!  Then npm ci once all the
-#       copyright changes are incorporated.
+# NOTE: If the community copyright gets injected at the bottom of the file, check that
+# the Red Hat copyright is padded with spaces between the comment character(s)
 
 TMP_FILE="tmp_file"
 
