@@ -124,7 +124,7 @@ do
                     # Capture up to the first blank line and then capture any comments within
                     EXISTING_HEADER=$(sed '/^$/q' $FILE | sed "/^[^${COMMENT_START}]/q" | sed '$d')
                     ALL_COPYRIGHTS="${EXISTING_HEADER}${NEWLINE}${ALL_COPYRIGHTS}"
-                    grep -v "^[$COMMENT_START]$" $FILE | grep -vF "$(echo "$EXISTING_HEADER" | grep -v "^[${COMMENT_START}]$")" > $TMP_FILE
+                    grep -v "^[$COMMENT_START]\+$" $FILE | grep -vF "$(echo "$EXISTING_HEADER" | grep -v "^[${COMMENT_START}]\+$")" > $TMP_FILE
                     mv $TMP_FILE  $FILE
                     echo -e "\t- Has general header"
                 else
