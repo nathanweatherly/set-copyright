@@ -9,11 +9,12 @@
 TMP_FILE="tmp_file"
 
 EXCLUDE_DIR_PREFIX=(
-    "\."                # Hidden directories
-    "node_modules"      # Node modules
-    "build-harness"     # Build harness
-    "vbh"               # Vendorized build harness
-    ".*_generated\.*"   # Generated files
+    "\."                        # Hidden directories
+    ".*/\.[a-zA-Z\.]\+"         # Hidden files
+    "node_modules"              # Node modules
+    "build-harness"             # Build harness
+    "vbh"                       # Vendorized build harness
+    ".*_generated\.[a-zA-Z.]"   # Generated files
     )
 
 FILTER_PATTERN=$(for i in "${!EXCLUDE_DIR_PREFIX[@]}"; do
