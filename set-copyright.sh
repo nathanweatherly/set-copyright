@@ -9,11 +9,11 @@
 TMP_FILE="tmp_file"
 
 EXCLUDE_DIR_PREFIX=(
-    "\."               # Hidden directories
-    "node_modules"     # Node modules
-    "build-harness"    # Build harness
-    "vbh"              # Vendorized build harness
-    ".*_generated\.*"
+    "\."                # Hidden directories
+    "node_modules"      # Node modules
+    "build-harness"     # Build harness
+    "vbh"               # Vendorized build harness
+    ".*_generated\.*"   # Generated files
     )
 
 FILTER_PATTERN=$(for i in "${!EXCLUDE_DIR_PREFIX[@]}"; do
@@ -125,7 +125,7 @@ do
                     # Capture up to the first blank line and then capture any comments within
                     EXISTING_HEADER=$(sed '/^$/q' $FILE | sed "/^[^${COMMENT_START}]/q" | sed '$d')
                     ALL_COPYRIGHTS="${EXISTING_HEADER}${NEWLINE}${ALL_COPYRIGHTS}"
-                    grep -v "^[$COMMENT_START]\+$" $FILE | grep -vF "$(echo "$EXISTING_HEADER" | grep -v "^[${COMMENT_START}]\+$")" > $TMP_FILE
+                    grep -v "^[$COMMENT_START]\{1,3\}$" $FILE | grep -vF "$(echo "$EXISTING_HEADER" | grep -v "^[${COMMENT_START}]\{1,3\}$")" > $TMP_FILE
                     mv $TMP_FILE  $FILE
                     echo -e "\t- Has general header"
                 else
