@@ -13,6 +13,7 @@ EXCLUDE_DIR_PREFIX=(
     "node_modules"     # Node modules
     "build-harness"    # Build harness
     "vbh"              # Vendorized build harness
+    ".*_generated\.*"
     )
 
 FILTER_PATTERN=$(for i in "${!EXCLUDE_DIR_PREFIX[@]}"; do
