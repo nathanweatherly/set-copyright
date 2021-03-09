@@ -3,8 +3,10 @@
 
 # TESTED ON MAC!
 
-# NOTE: If the community copyright gets injected at the bottom of the file, check that
-# the Red Hat copyright is padded with spaces between the comment character(s)
+# NOTES: 
+# - If the community copyright gets injected at the bottom of the file, check that
+#   the Red Hat copyright is padded with spaces between the comment character(s)
+# - Make sure there are no lines in files with blank spaces
 
 TMP_FILE="tmp_file"
 
