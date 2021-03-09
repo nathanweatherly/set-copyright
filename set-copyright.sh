@@ -9,9 +9,11 @@
 # - Make sure there are no lines in files with only whitespace (newlines are okay)
 # - The script assumes that headers are continuous and begin on the first line
 
-TMP_FILE="tmp_file"
-
-EXCLUDE_DIR_PREFIX=(
+# Configurations
+TMP_FILE=${TMP_FILE:-"tmp_file"}            # Name of temporary file
+DRY_RUN=${DRY_RUN:-true}                    # Whether to make changes to files
+ADD_RH_COPYRIGHT=${ADD_RH_COPYRIGHT:-false} # Whether to add Red Hat copyright if it's not there
+EXCLUDE_DIR_PREFIX=(                        # Directory/file exclusions
     "\."                        # Hidden directories
     ".*/\.[a-zA-Z\.]\+"         # Hidden files
     "node_modules"              # Node modules
@@ -28,8 +30,6 @@ FILTER_PATTERN=$(for i in "${!EXCLUDE_DIR_PREFIX[@]}"; do
 done)
 
 ALL_FILES=$(find . -name "*" | grep -v "${FILTER_PATTERN}")
-
-DRY_RUN=${DRY_RUN:-true}
 
 SCRIPT_DIR=$(dirname "${BASH_SOURCE[0]}")
 
@@ -114,6 +114,7 @@ do
 
             ALL_COPYRIGHTS=""
 
+            FOUND_RH="false"
             for rh_header in "${RH_COPY_HEADER[@]}"; do
                 RH_COPY_HEADER_AS_COMMENT="$COMMENT_START$rh_header$COMMENT_END"
                 if grep -qF "$RH_COPY_HEADER_AS_COMMENT" "$FILE"; then
@@ -121,8 +122,13 @@ do
                     grep -vF "$RH_COPY_HEADER_AS_COMMENT" $FILE > $TMP_FILE
                     mv $TMP_FILE  $FILE
                     echo -e "\t- Has Red Hat copyright header"
+                    FOUND_RH="true"
                 fi
             done
+            if [[ "${ADD_RH_COPYRIGHT}" == "true" ]] && [[ "${FOUND_RH}" == "false" ]]; then
+                ALL_COPYRIGHTS="${ALLCOPYRIGHTS}${COMMENT_START}${RH_COPY_HEADER[${#RH_COPY_HEADER[@]}-1]}${COMMENT_END}${NEWLINE}"
+                echo -e "\t- Adding Red Hat copyright header to file"
+            fi
 
             # Capture any other header information
             if (head -1 ${FILE} | grep "^$(echo "${COMMENT_START}" | sed 's/ $//' | sed 's/\*/\\*/')" &>/dev/null); then
