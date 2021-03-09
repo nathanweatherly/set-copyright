@@ -6,7 +6,7 @@
 # NOTES: 
 # - If the community copyright gets injected at the bottom of the file, check that
 #   the Red Hat copyright is padded with spaces between the comment character(s)
-# - Make sure there are no lines in files with only whitespace
+# - Make sure there are no lines in files with only whitespace (newlines are okay)
 # - The script assumes that headers are continuous and begin on the first line
 
 TMP_FILE="tmp_file"
