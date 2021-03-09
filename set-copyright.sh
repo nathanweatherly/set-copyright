@@ -68,7 +68,7 @@ do
         COMMENT_START="// "
     fi
 
-    if [[ $FILE  == *".ts" || $FILE  == *".tsx" || $FILE  == *".js" ]]; then
+    if [[ $FILE  == *".ts" || $FILE  == *".tsx" || $FILE  == *".js" || $FILE  == *".scss" ]]; then
         COMMENT_START="/* "
         COMMENT_END=" */"
     fi
@@ -88,6 +88,7 @@ do
             || $FILE == *".yml"  \
             || $FILE == *".sh"   \
             || $FILE == *".js"   \
+            || $FILE == *".scss" \
             || $FILE == *".ts"   \
             || $FILE == *".tsx"   \
             || $FILE == *"Dockerfile" \
@@ -131,9 +132,9 @@ do
                     echo -e "\t- Has general header"
                 else
                     # Capture first full comment
-                    EXISTING_HEADER=$(sed -n "\%^$(echo "${COMMENT_START}" | sed 's/ $//' | sed 's/\*/\\*/')%,\%$(echo "${COMMENT_END}" | sed 's/^ //' | sed 's/\*/\\*/')$%p" $FILE)
+                    EXISTING_HEADER=$(sed -n "\%^$(echo "${COMMENT_START}" | sed 's/ $//' | sed 's/\*/\\*/')%,\%$(echo "${COMMENT_END}" | sed 's/^ //' | sed 's/\*/\\*/')$%p; \%$(echo "${COMMENT_END}" | sed 's/^ //' | sed 's/\*/\\*/')$%q" $FILE)
                     ALL_COPYRIGHTS="${EXISTING_HEADER}${NEWLINE}${ALL_COPYRIGHTS}"
-                    sed "\%^$(echo "${COMMENT_START}" | sed 's/ $//' | sed 's/\*/\\*/')%,\%$(echo "${COMMENT_END}" | sed 's/^ //' | sed 's/\*/\\*/')$%d" $FILE > $TMP_FILE
+                    sed -n "\%$(echo "${COMMENT_END}" | sed 's/^ //' | sed 's/\*/\\*/')$%,\$p" $FILE | sed '1d' > $TMP_FILE
                     mv $TMP_FILE  $FILE
                     echo -e "\t- Has general header"
                 fi
