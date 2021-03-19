@@ -8,21 +8,7 @@
 
 TMP_FILE="tmp_file"
 
-EXCLUDE_DIR_PREFIX=(
-    "\."               # Hidden directories
-    "node_modules"     # Node modules
-    "build-harness"    # Build harness
-    "vbh"              # Vendorized build harness
-    )
-
-FILTER_PATTERN=$(for i in "${!EXCLUDE_DIR_PREFIX[@]}"; do
-    printf "^\./${EXCLUDE_DIR_PREFIX[i]}"
-    if (( i < ${#EXCLUDE_DIR_PREFIX[@]} - 1 )); then
-        printf "\|";
-    fi
-done)
-
-ALL_FILES=$(find . -name "*" | grep -v "${FILTER_PATTERN}")
+ALL_FILES=$(git ls-files)
 
 DRY_RUN=${DRY_RUN:-true}
 
@@ -43,6 +29,7 @@ echo "Desired copyright header is: $COMMUNITY_COPY_HEADER_STRING"
 
 # NOTE: Only use one newline or javascript and typescript linter/prettier will complain about the extra blank lines
 NEWLINE="\n"
+
 
 if [[ "$DRY_RUN" == true ]]; then
    echo "---- Beginning dry run ----"
